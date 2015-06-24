@@ -110,6 +110,10 @@ namespace Microsoft.Data.Entity.FunctionalTests
                 .WithOne(e => e.ParentCollection)
                 .ForeignKey(e => e.ParentCollectionId)
                 .Required(false);
+
+            // #3282
+            modelBuilder.Entity<BaseCollectionOnBase>().Property(e => e.BaseParentId).Metadata.RequiresValueGenerator = false;
+            modelBuilder.Entity<BaseReferenceOnBase>().Property(e => e.BaseParentId).Metadata.RequiresValueGenerator = false;
         }
     }
 }
