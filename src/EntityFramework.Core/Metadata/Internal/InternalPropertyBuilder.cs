@@ -76,7 +76,7 @@ namespace Microsoft.Data.Entity.Metadata.Internal
                || ((IProperty)Metadata).IsNullable == !isRequired;
 
         public virtual bool HasMaxLength(int? maxLength, ConfigurationSource configurationSource)
-            => Annotation(CoreAnnotationNames.MaxLengthAnnotation, maxLength, configurationSource);
+            => HasAnnotation(CoreAnnotationNames.MaxLengthAnnotation, maxLength, configurationSource);
 
         public virtual bool IsConcurrencyToken(bool? isConcurrencyToken, ConfigurationSource configurationSource)
         {

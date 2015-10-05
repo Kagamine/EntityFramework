@@ -184,7 +184,7 @@ namespace Microsoft.Data.Entity.Metadata.Conventions
         {
             var derivedEntityTypeBuilder = CreateInternalEntityTypeBuilder<DerivedEntity>();
             var baseEntityType = derivedEntityTypeBuilder.ModelBuilder.Entity(typeof(BaseEntity), ConfigurationSource.Explicit).Metadata;
-            derivedEntityTypeBuilder.BaseType(baseEntityType, ConfigurationSource.Explicit);
+            derivedEntityTypeBuilder.HasBaseType(baseEntityType, ConfigurationSource.Explicit);
 
             var propertyBuilder = derivedEntityTypeBuilder.Property("Number", typeof(int), ConfigurationSource.Explicit);
 
