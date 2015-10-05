@@ -21,8 +21,10 @@ namespace Microsoft.Data.Entity.Sqlite.Design.ReverseEngineering
     public class SqliteMetadataModelProvider : RelationalMetadataModelProvider
     {
         private readonly SqliteMetadataReader _metadataReader;
+        private readonly SqliteReverseTypeMapper _typeMapper;
 
         public SqliteMetadataModelProvider(
+            [NotNull] SqliteReverseTypeMapper typeMapper,
             [NotNull] ILoggerFactory loggerFactory,
             [NotNull] ModelUtilities modelUtilities,
             [NotNull] CSharpUtilities cSharpUtilities,
@@ -30,8 +32,10 @@ namespace Microsoft.Data.Entity.Sqlite.Design.ReverseEngineering
             )
             : base(loggerFactory, modelUtilities, cSharpUtilities)
         {
+            Check.NotNull(typeMapper, nameof(typeMapper));
             Check.NotNull(metadataReader, nameof(metadataReader));
 
+            _typeMapper = typeMapper;
             _metadataReader = metadataReader;
         }
 
@@ -43,14 +47,7 @@ namespace Microsoft.Data.Entity.Sqlite.Design.ReverseEngineering
 
             var modelBuilder = new ModelBuilder(new ConventionSet());
 
-            DatabaseInfo databaseInfo;
-
-            using (var connection = new SqliteConnection(connectionString))
-            {
-                connection.Open();
-
-                databaseInfo = _metadataReader.ReadDatabaseInfo(connection, _tableSelectionSet);
-            }
+            var databaseInfo = _metadataReader.GetDatabaseInfo(connectionString, _tableSelectionSet);
 
             LoadEntityTypes(modelBuilder, databaseInfo);
             LoadIndexes(modelBuilder, databaseInfo);
@@ -153,7 +150,9 @@ namespace Microsoft.Data.Entity.Sqlite.Design.ReverseEngineering
 
                         foreach (var column in databaseInfo.Columns.Where(c => c.TableName.Equals(tableName, StringComparison.OrdinalIgnoreCase)))
                         {
-                            var property = builder.Property(column.ClrType, column.Name)
+                            // TODO log bad datatypes
+                            var clrType = _typeMapper.GetClrType(column.DataType, nullable: column.IsNullable);
+                            var property = builder.Property(clrType, column.Name)
                                 .HasSqliteColumnName(column.Name);
 
                             if (!string.IsNullOrEmpty(column.DataType))
